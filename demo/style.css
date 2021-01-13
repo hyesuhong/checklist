@@ -1,0 +1,212 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500&family=Raleway:ital,wght@1,700&display=swap');
+
+* {
+  font-family: 'Noto Sans KR', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+ul li,
+ol li {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+img {
+  vertical-align: top;
+}
+
+html {
+  font-size: 14px;
+}
+
+body {
+  background: #f4ece3;
+  color: #606060;
+}
+
+/* header style */
+
+header {
+  height: 50px;
+  text-align: center;
+  border-bottom: 1px solid #606060;
+  box-sizing: border-box;
+}
+
+header > nav {
+  position: relative;
+  width: 90%;
+  margin: 0 auto;
+}
+
+header > nav > h1 {
+  font-family: 'Raleway', sans-serif;
+  font-style: italic;
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 50px;
+}
+
+/* main -> list & checkbox style */
+
+main {
+  height: calc(100% - 120px);
+  overflow-y: auto;
+}
+
+main::-webkit-scrollbar {
+  display: none;
+}
+
+main > ul {
+  padding-left: 5%;
+  padding-top: 6.4%;
+}
+
+main > ul > li {
+  display: flex;
+  position: relative;
+  margin-bottom: 6.4%;
+  height: 30px;
+  align-items: center;
+  color: #606060;
+  overflow-x: hidden;
+}
+
+main > ul > li:last-child {
+  margin-bottom: 0;
+}
+
+main > ul > li > input[type='checkbox'] {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  visibility: hidden;
+  transition: all 0.3s;
+}
+
+main > ul > li > label {
+  position: relative;
+  padding-left: 30px;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+main > ul > li > label::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border: 1px solid #606060;
+}
+
+main > ul > li > label::after {
+  content: url('./src/icon_check.png');
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 4px;
+  transform: translateY(-50%);
+}
+
+main > ul > li > input[type='checkbox']:checked,
+main > ul > li > input[type='checkbox']:checked + label {
+  opacity: 0.4;
+}
+
+main > ul > li > input[type='checkbox']:checked + label::before {
+  background: #606060;
+}
+
+main > ul > li > input[type='checkbox']:checked + label::after {
+  display: block;
+}
+
+main > ul > li > button.delete_btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 100%;
+  background-color: transparent;
+  background: url('./src/icon_trash.png') no-repeat center center;
+  border: none;
+  outline: none;
+}
+
+/* main > ul > li > button.delete_btn > img {
+  height: 80%;
+} */
+
+/* footer -> add btn style */
+
+footer {
+  display: flex;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+footer > input#INPUT_LIST {
+  width: calc(100% - 50px);
+  height: 40px;
+  padding: 2%;
+  box-sizing: border-box;
+  border: none;
+  border-bottom: 1px solid #606060;
+  background: transparent;
+  border-radius: 0;
+  outline: none;
+  color: #606060;
+}
+
+footer > button#ADD_BTN {
+  position: relative;
+  /* bottom: 0;
+  right: 0; */
+  width: 44px;
+  height: 44px;
+  background: #606060;
+  border: none;
+  outline: none;
+}
+
+footer > button#ADD_BTN::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 60%;
+  background: #fff;
+}
+
+footer > button#ADD_BTN::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 2px;
+  background: #fff;
+}
