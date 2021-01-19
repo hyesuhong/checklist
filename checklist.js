@@ -6,13 +6,23 @@ const input_list = document.querySelector('#INPUT_LIST');
 const add_btn = document.querySelector('#ADD_BTN');
 const delete_btn = document.querySelectorAll('.delete_btn');
 
-let num = 0;
+let num = localStorage.length;
+
+function firstGetItems() {
+  for (let i = 0; i < num; i++) {
+    let item = localStorage.getItem(`${i}`);
+    let item_obj = JSON.parse(item);
+    createList(item_obj.text, item_obj.no);
+  }
+}
+
+firstGetItems();
 
 // 입력된 아이템을 localStorage 저장
 function saveItems(index, text) {
   localStorage.setItem(
-    `${index}`,
-    `{"no": "${index}", "text": "${text}", "date": "${new Date()}"}`
+    `${text}`,
+    `{"no": "${index}", "text": "${text}", "date": "${new Date()}", "check": "false"}`
   );
   return localStorage.getItem(`${index}`);
 }
@@ -43,7 +53,7 @@ function paintHTML(index) {
   } else {
     let items = saveItems(index, text);
     let items_obj = JSON.parse(items);
-    createList(items_obj.text, `ITEM_${items_obj.no}`);
+    createList(items_obj.text, items_obj.no);
     num++;
   }
 
@@ -64,21 +74,14 @@ input_list.addEventListener('keyup', (event) => {
 });
 
 // delete item from the list_box & list_arr
-// list_box.addEventListener('click', (event) => {
-//   let target_li = event.target.parentNode;
+list_box.addEventListener('click', (event) => {
+  let target_li = event.target.parentNode;
 
-//   if (event.target.tagName === 'BUTTON') {
-//     event.currentTarget.removeChild(target_li);
-//     console.log(target_li);
+  if (event.target.tagName === 'BUTTON') {
+    let data_item = target_li.getAttribute('data-item').split('_');
+    let list_num = data_item[1];
 
-//     const data_item = target_li.getAttribute('data-item');
-//     const list_num = data_item.split('_');
-//     const itemToFind = list_arr.find(function (item) {
-//       return item.no == list_num[1];
-//     });
-//     const index = list_arr.indexOf(itemToFind);
-//     if (index > -1) list_arr.splice(index, 1);
-//   }
-//   // console.log('delete',list_arr);
-//   return list_arr;
-// });
+    event.currentTarget.removeChild(target_li);
+    localStorage.removeItem(list_num);
+  }
+});
