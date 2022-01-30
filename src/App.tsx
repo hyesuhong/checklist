@@ -1,5 +1,5 @@
 import { createGlobalStyle } from 'styled-components';
-import ToDoList from './ToDoList';
+import ToDoList from './components/ToDoList';
 
 // createGlobalStyle : 전역으로 부를 수 있는 스타일 컴포넌트를 생성
 const GlobalStyle = createGlobalStyle`
