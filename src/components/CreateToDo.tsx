@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
-import { useSetRecoilState } from 'recoil';
-import { toDoState } from '../atoms';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { categoryState, toDoState } from '../atoms';
 
 /* react hook form -> 여러 인풋을 사용할 때 좋은 라이브러리. validation을 하기 편함 */
 interface IForm {
@@ -9,7 +9,8 @@ interface IForm {
 
 function CreateToDo() {
 	/* useState와 비슷한 형태로 사용할 수 있음 */
-	const modifier = useSetRecoilState(toDoState);
+	const setToDos = useSetRecoilState(toDoState);
+	const category = useRecoilValue(categoryState);
 	/*
   - register을 사용하면 기존에 useState, onChange 등을 사용해서 관리하던 것들을 해결해줌
   - ...register('toDo') : es6. register함수가 리턴하는 객체를 인풋에 props로 전달
@@ -20,8 +21,8 @@ function CreateToDo() {
   */
 	const { register, handleSubmit, setValue } = useForm<IForm>();
 	const onValid = ({ toDo }: IForm) => {
-		modifier((prev) => [
-			{ text: toDo, id: Date.now(), category: 'TO_DO' },
+		setToDos((prev) => [
+			{ text: toDo, id: Date.now(), category: category },
 			...prev,
 		]);
 		setValue('toDo', '');
