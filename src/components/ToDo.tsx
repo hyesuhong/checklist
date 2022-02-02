@@ -1,42 +1,67 @@
 import React from 'react';
-import { useSetRecoilState } from 'recoil';
-import { Categories, IToDos, toDoState } from '../atoms';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import styled from 'styled-components';
+import { categoryState, Conditions, IToDos, toDoState } from '../atoms';
+import { IconRemove } from '../assets/image/icon';
 
-function ToDo({ text, category, id }: IToDos) {
-	const setToDos = useSetRecoilState(toDoState);
-	const onClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+const ToDoItem = styled.li<{ bdColor?: string }>`
+	position: relative;
+	padding: 10px 5px;
+	border-radius: 5px;
+	border-left: 3px solid ${(props) => props.bdColor};
+	margin-bottom: 10px;
+	button.removeBtn {
+		position: absolute;
+		top: 50%;
+		right: 0;
+		transform: translateY(-50%);
+		width: 26px;
+		height: 26px;
+		padding: 0;
+		background: transparent;
+		border: none;
+		outline: none;
+	}
+`;
+
+interface IToDoItem extends IToDos {
+	mode: string;
+}
+
+function ToDo({ text, category, id, condition, mode }: IToDoItem) {
+	const categorySet = useRecoilValue(categoryState);
+	const [toDos, setToDos] = useRecoilState(toDoState);
+	const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const {
-			currentTarget: { name },
+			currentTarget: { value, checked },
 		} = event;
+
 		setToDos((prev) => {
-			const targetIndex = prev.findIndex((todo) => todo.id === id);
-			const newToDo = { text: text, id: id, category: name as any };
-			return [
-				...prev.slice(0, targetIndex),
-				newToDo,
-				...prev.slice(targetIndex + 1),
-			];
+			const targetIndex = prev.findIndex((todo) => todo.id === Number(value));
+			const newToDo = { text: text, id: id, category: category, condition: checked ? Conditions.DONE : Conditions.YET };
+			return [...prev.slice(0, targetIndex), newToDo, ...prev.slice(targetIndex + 1)];
 		});
 	};
+
+	const removeItem = (event: React.MouseEvent<HTMLButtonElement>) => {
+		setToDos((prev) => {
+			const targetIndex = prev.findIndex((todo) => todo.id === id);
+			return [...prev.slice(0, targetIndex), ...prev.slice(targetIndex + 1)];
+		});
+		localStorage.setItem('toDo', JSON.stringify(toDos));
+	};
+
 	return (
-		<li>
+		<ToDoItem bdColor={categorySet.find((cate) => cate.id == category)?.color}>
+			<input type='checkbox' id={`CHK_${id}`} value={id} onChange={onChange} checked={condition == Conditions.YET ? false : true} disabled={mode == 'Edit' ? true : false} />
+			<label htmlFor={`CHK_${id}`}></label>
 			<span>{text}</span>
-			{category !== Categories.DONE && (
-				<button onClick={onClick} name={Categories.DONE}>
-					Done
+			{mode == 'Edit' ? (
+				<button className='removeBtn' onClick={removeItem}>
+					<IconRemove fill='#fff' />
 				</button>
-			)}
-			{category !== Categories.DOING && (
-				<button onClick={onClick} name={Categories.DOING}>
-					Doing
-				</button>
-			)}
-			{category !== Categories.TO_DO && (
-				<button onClick={onClick} name={Categories.TO_DO}>
-					To Do
-				</button>
-			)}
-		</li>
+			) : null}
+		</ToDoItem>
 	);
 }
 

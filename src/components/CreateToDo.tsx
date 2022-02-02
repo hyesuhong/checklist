@@ -1,15 +1,52 @@
 import { useForm } from 'react-hook-form';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { categoryState, toDoState } from '../atoms';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import styled from 'styled-components';
+import { categoryState, Conditions, toDoState } from '../atoms';
+
+const AddToDoForm = styled.form`
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 40px;
+	display: flex;
+
+	select {
+		flex: 0 0 100px;
+		height: 100%;
+		background: #000;
+		border: none;
+		outline: none;
+		color: #fff;
+	}
+	input {
+		flex: 1;
+		height: 100%;
+		background: transparent;
+		outline: none;
+		color: #fff;
+	}
+	button {
+		flex: 0 0 40px;
+		height: 100%;
+		font-size: 30px;
+		padding: 0;
+		color: #fff;
+		background: transparent;
+		border: none;
+		outline: none;
+	}
+`;
 
 /* react hook form -> 여러 인풋을 사용할 때 좋은 라이브러리. validation을 하기 편함 */
 interface IForm {
 	toDo: string;
+	categoryId: number;
 }
 
 function CreateToDo() {
 	/* useState와 비슷한 형태로 사용할 수 있음 */
-	const setToDos = useSetRecoilState(toDoState);
+	const [toDos, setToDos] = useRecoilState(toDoState);
 	const category = useRecoilValue(categoryState);
 	/*
   - register을 사용하면 기존에 useState, onChange 등을 사용해서 관리하던 것들을 해결해줌
@@ -20,22 +57,24 @@ function CreateToDo() {
   - setError : 특정한 에러를 발생시켜줌
   */
 	const { register, handleSubmit, setValue } = useForm<IForm>();
-	const onValid = ({ toDo }: IForm) => {
-		setToDos((prev) => [
-			{ text: toDo, id: Date.now(), category: category },
-			...prev,
-		]);
+	const onValid = async ({ toDo, categoryId }: IForm) => {
+		await setToDos((prev) => [{ text: toDo, id: Date.now(), category: categoryId, condition: Conditions.YET }, ...prev]);
 		setValue('toDo', '');
+		localStorage.setItem('toDo', JSON.stringify(toDos));
 	};
 
 	return (
-		<form onSubmit={handleSubmit(onValid)}>
-			<input
-				{...register('toDo', { required: 'Please write your to do' })}
-				placeholder='Write a to do'
-			/>
-			<button>Add</button>
-		</form>
+		<AddToDoForm onSubmit={handleSubmit(onValid)}>
+			<select {...register('categoryId')}>
+				{Object.values(category).map((item) => (
+					<option value={item.id} key={item.id}>
+						{item.name}
+					</option>
+				))}
+			</select>
+			<input {...register('toDo', { required: true })} placeholder='Write a to do' />
+			<button>+</button>
+		</AddToDoForm>
 	);
 }
 export default CreateToDo;

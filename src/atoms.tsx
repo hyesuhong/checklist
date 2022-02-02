@@ -6,21 +6,41 @@ import { atom, selector } from 'recoil';
 
 // 다른 파일에서도 사용할 수 있는 것은 enum
 // 기본으로 리턴하는 값은 순서(숫자). 다른 값을 원한다면 = '원하는 값'을 해줘야 함.
-export enum Categories {
-	'TO_DO' = 'TO_DO',
-	'DOING' = 'DOING',
-	'DONE' = 'DONE',
+// export enum Categories {
+// 	'TO_DO' = 'TO_DO',
+// 	'DOING' = 'DOING',
+// 	'DONE' = 'DONE',
+// }
+
+export enum Conditions {
+	'DONE',
+	'YET',
 }
 
 export interface IToDos {
 	text: string;
 	id: number;
-	category: Categories;
+	category: number;
+	condition: Conditions;
 }
 
-export const categoryState = atom<Categories>({
+export interface ICategory {
+	id: number;
+	name: string;
+	color?: string;
+}
+
+export const viewState = atom({
+	key: 'view',
+	default: '0',
+});
+
+export const categoryState = atom<ICategory[]>({
 	key: 'category',
-	default: Categories.TO_DO,
+	default: [
+		{ id: 1, name: 'Personal', color: '#a55eea' },
+		{ id: 2, name: 'Office', color: '#2bcbba' },
+	],
 });
 
 export const toDoState = atom<IToDos[]>({
@@ -33,8 +53,8 @@ export const toDoSelector = selector({
 	key: 'toDoSelector',
 	get: ({ get }) => {
 		const toDos = get(toDoState);
-		const category = get(categoryState);
-		return toDos.filter((toDo) => toDo.category === category);
+		const view = get(viewState);
+		return view == '0' ? toDos : toDos.filter((toDo) => toDo.category == Number(view));
 		// return [
 		// 	toDos.filter((toDo) => toDo.category === 'TO_DO'),
 		// 	toDos.filter((toDo) => toDo.category === 'DOING'),
