@@ -32,20 +32,22 @@ export interface ICategory {
 
 export const viewState = atom({
 	key: 'view',
-	default: '0',
+	default: 0,
 });
 
 export const categoryState = atom<ICategory[]>({
 	key: 'category',
-	default: [
-		{ id: 1, name: 'Personal', color: '#a55eea' },
-		{ id: 2, name: 'Office', color: '#2bcbba' },
-	],
+	default: localStorage.getItem('category')
+		? JSON.parse(localStorage.getItem('category') as string)
+		: [
+				{ id: 1, name: 'Personal', color: '#a55eea' },
+				{ id: 2, name: 'Office', color: '#2bcbba' },
+		  ],
 });
 
 export const toDoState = atom<IToDos[]>({
 	key: 'toDo',
-	default: [],
+	default: JSON.parse(localStorage.getItem('toDo') || '[]'),
 });
 
 /* selector : atom의 output을 변형시키는 도구 */
@@ -54,7 +56,7 @@ export const toDoSelector = selector({
 	get: ({ get }) => {
 		const toDos = get(toDoState);
 		const view = get(viewState);
-		return view == '0' ? toDos : toDos.filter((toDo) => toDo.category == Number(view));
+		return view == 0 ? toDos : toDos.filter((toDo) => toDo.category == Number(view));
 		// return [
 		// 	toDos.filter((toDo) => toDo.category === 'TO_DO'),
 		// 	toDos.filter((toDo) => toDo.category === 'DOING'),

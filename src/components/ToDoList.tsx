@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import styled from 'styled-components';
-import { categoryState, toDoSelector, toDoState, viewState } from '../atoms';
+import { categoryState, toDoSelector, viewState } from '../atoms';
 import CreateToDo from './CreateToDo';
 import ToDo from './ToDo';
 import { useForm } from 'react-hook-form';
@@ -151,23 +151,10 @@ function ToDoList() {
 	const [editMode, setEditMode] = useState(false);
 	const [category, setCategory] = useRecoilState(categoryState);
 	const [view, setView] = useRecoilState(viewState);
-	const lsCategory = localStorage.getItem('category');
-	if (lsCategory === null) {
-		localStorage.setItem('category', JSON.stringify(category));
-	} else {
-		const stringCategory = JSON.stringify(category);
-		if (lsCategory != stringCategory) {
-			if (lsCategory.length > stringCategory.length) {
-				setCategory(JSON.parse(localStorage.getItem('category') as string));
-			} else {
-				localStorage.setItem('category', JSON.stringify(category));
-			}
-		}
-	}
 
 	const clickCategory = (event: React.MouseEvent<HTMLLIElement>) => {
 		const classList = event.currentTarget.classList;
-		const dataKey = event.currentTarget.dataset.key ? event.currentTarget.dataset.key : '0';
+		const dataKey = event.currentTarget.dataset.key ? Number(event.currentTarget.dataset.key) : 0;
 		if (classList.contains('active')) {
 			return;
 		} else {
@@ -186,24 +173,13 @@ function ToDoList() {
 	const { register, handleSubmit, setValue } = useForm<IForm>();
 	const onValid = ({ cateName, cateColor }: IForm) => {
 		setCategory((prev) => [...prev, { id: Date.now(), name: cateName, color: cateColor }]);
-		// localStorage.setItem('category', JSON.stringify(category));
 		setValue('cateName', '');
 		setValue('cateColor', '');
 		setShowModal(false);
 	};
-
-	const [toDoArr, setToDoArr] = useRecoilState(toDoState);
-	const lsToDo = localStorage.getItem('toDo');
 	useEffect(() => {
-		if (lsToDo === null) {
-			localStorage.setItem('toDo', JSON.stringify(toDoArr));
-		} else {
-			const stringToDoArr = JSON.stringify(toDoArr);
-			if (lsToDo != stringToDoArr) {
-				setToDoArr(JSON.parse(localStorage.getItem('toDo') as string));
-			}
-		}
-	}, []);
+		localStorage.setItem('category', JSON.stringify(category));
+	}, [category]);
 
 	const toDos = useRecoilValue(toDoSelector);
 

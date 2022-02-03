@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import styled from 'styled-components';
@@ -60,8 +61,11 @@ function CreateToDo() {
 	const onValid = async ({ toDo, categoryId }: IForm) => {
 		await setToDos((prev) => [{ text: toDo, id: Date.now(), category: categoryId, condition: Conditions.YET }, ...prev]);
 		setValue('toDo', '');
-		localStorage.setItem('toDo', JSON.stringify(toDos));
 	};
+
+	useEffect(() => {
+		localStorage.setItem('toDo', JSON.stringify(toDos));
+	}, [toDos]);
 
 	return (
 		<AddToDoForm onSubmit={handleSubmit(onValid)}>
