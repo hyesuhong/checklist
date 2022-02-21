@@ -56,7 +56,7 @@ export const toDoSelector = selector({
 	get: ({ get }) => {
 		const toDos = get(toDoState);
 		const view = get(viewState);
-		return view == 0 ? toDos : toDos.filter((toDo) => toDo.category == Number(view));
+		return view === 0 ? toDos : toDos.filter((toDo) => Number(toDo.category) === Number(view));
 		// return [
 		// 	toDos.filter((toDo) => toDo.category === 'TO_DO'),
 		// 	toDos.filter((toDo) => toDo.category === 'DOING'),

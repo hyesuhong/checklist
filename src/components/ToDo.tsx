@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import styled from 'styled-components';
 import { categoryState, Conditions, IToDos, toDoState } from '../atoms';
 import { IconRemove } from '../assets/image/icon';
@@ -52,11 +52,11 @@ function ToDo({ text, category, id, condition, mode }: IToDoItem) {
 	};
 
 	return (
-		<ToDoItem bdColor={categorySet.find((cate) => cate.id == category)?.color}>
-			<input type='checkbox' id={`CHK_${id}`} value={id} onChange={onChange} checked={condition == Conditions.YET ? false : true} disabled={mode == 'Edit' ? true : false} />
+		<ToDoItem bdColor={categorySet.find((cate) => cate.id === Number(category))?.color}>
+			<input type='checkbox' id={`CHK_${id}`} value={id} onChange={onChange} checked={condition === Conditions.YET ? false : true} disabled={mode === 'Edit' ? true : false} />
 			<label htmlFor={`CHK_${id}`}></label>
 			<span>{text}</span>
-			{mode == 'Edit' ? (
+			{mode === 'Edit' ? (
 				<button className='removeBtn' onClick={removeItem}>
 					<IconRemove fill='#fff' />
 				</button>

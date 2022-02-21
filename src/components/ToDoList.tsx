@@ -5,25 +5,22 @@ import { categoryState, toDoSelector, viewState } from '../atoms';
 import CreateToDo from './CreateToDo';
 import ToDo from './ToDo';
 import { useForm } from 'react-hook-form';
+import { HexColorPicker } from 'react-colorful';
 
 const Container = styled.div`
-	position: relative;
-	display: flex;
-	flex-direction: column;
-	max-width: 480px;
-	height: calc(100vh - 20px);
-	margin: 10px auto;
-	border-radius: 10px;
-	border: 1px solid #fff;
-	padding-bottom: 40px;
+	display: grid;
+	grid-template-rows: min-content minmax(0, auto);
+	grid-template-columns: 70px 2fr;
+	height: 100vh;
 `;
 
 const Header = styled.header`
 	position: relative;
+	grid-column: span 2;
+	height: 50px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	flex: 0 0 50px;
 	padding: 0 5%;
 	border-bottom: 1px solid #fff;
 
@@ -35,11 +32,16 @@ const Header = styled.header`
 		width: 40px;
 		height: 26px;
 		background: transparent;
-		border: 1px solid #fff;
+		border: 1px solid ${(props) => props.theme.textColor};
 		border-radius: 5px;
 		outline: none;
-		color: #fff;
+		color: ${(props) => props.theme.textColor};
 		padding: 0;
+		transition: all 0.3s;
+	}
+	button.editBtn:hover {
+		background: ${(props) => props.theme.textColor};
+		color: ${(props) => props.theme.bgColor};
 	}
 `;
 
@@ -50,16 +52,22 @@ const Title = styled.h1`
 `;
 
 const CategoryList = styled.ul`
-	flex: 0 0 80px;
-	display: flex;
-	justify-content: flex-start;
-	align-items: center;
-	padding: 0 5%;
-	margin: 10px 0;
-	overflow-x: auto;
-	overflow-y: hidden;
+	padding: 10px 5px;
+	border-right: 1px solid ${(props) => props.theme.textColor};
+	overflow-x: hidden;
+	overflow-y: auto;
 	::-webkit-scrollbar {
 		display: none;
+	}
+
+	button {
+		width: 100%;
+		height: 60px;
+		border-radius: 100%;
+		background: #fdfdfd;
+		border: none;
+		outline: none;
+		font-size: 1.4rem;
 	}
 `;
 
@@ -68,14 +76,15 @@ const CategoryItem = styled.li<{ bdColor?: string }>`
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	flex: 0 0 80px;
-	height: 80px;
+	width: 100%;
+	height: 60px;
 	background: #fdfdfd;
 	color: #000;
 	border-radius: 100%;
-	margin-right: 20px;
+	margin-bottom: 10px;
 	font-size: 14px;
 	opacity: 0.5;
+	cursor: pointer;
 
 	&.active {
 		opacity: 1;
@@ -102,13 +111,23 @@ const SettingCategory = styled.div`
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	div {
-		width: 200px;
+	& > div {
+		width: 300px;
 		padding: 10px;
 		border-radius: 10px;
 		background: ${(props) => props.theme.bgColor};
 		border: 1px solid #fff;
 		text-align: right;
+	}
+	div.react-colorful {
+		width: 100%;
+		margin: 5px auto;
+	}
+	div.react-colorful__saturation {
+		border-radius: 0;
+	}
+	div.react-colorful__last-control {
+		border-radius: 0;
 	}
 	button {
 		width: 30px;
@@ -129,7 +148,6 @@ const SettingCategory = styled.div`
 			border: 1px solid #fff;
 			outline: none;
 			color: #fff;
-			margin-bottom: 5px;
 		}
 	}
 `;
@@ -143,7 +161,6 @@ const ToDoContent = styled.ul`
 
 interface IForm {
 	cateName: string;
-	cateColor?: string;
 }
 
 function ToDoList() {
@@ -151,17 +168,19 @@ function ToDoList() {
 	const [editMode, setEditMode] = useState(false);
 	const [category, setCategory] = useRecoilState(categoryState);
 	const [view, setView] = useRecoilState(viewState);
+	const [color, setColor] = useState('#000000');
 
 	const clickCategory = (event: React.MouseEvent<HTMLLIElement>) => {
 		const classList = event.currentTarget.classList;
-		const dataKey = event.currentTarget.dataset.key ? Number(event.currentTarget.dataset.key) : 0;
+		// const dataKey = event.currentTarget.dataset.key ? Number(event.currentTarget.dataset.key) : 0;
+		const dataKey = Number(event.currentTarget.dataset.key);
 		if (classList.contains('active')) {
 			return;
 		} else {
 			const categories = event.currentTarget.parentElement?.children;
 			if (typeof categories != 'undefined') {
 				Array.from(categories).forEach((element) => {
-					if (element == event.currentTarget) {
+					if (element === event.currentTarget) {
 						element.classList.add('active');
 						setView(dataKey);
 					} else element.classList.remove('active');
@@ -171,10 +190,10 @@ function ToDoList() {
 	};
 
 	const { register, handleSubmit, setValue } = useForm<IForm>();
-	const onValid = ({ cateName, cateColor }: IForm) => {
-		setCategory((prev) => [...prev, { id: Date.now(), name: cateName, color: cateColor }]);
+	const onValid = ({ cateName }: IForm) => {
+		setCategory((prev) => [...prev, { id: Date.now(), name: cateName, color: color }]);
 		setValue('cateName', '');
-		setValue('cateColor', '');
+		setColor('#ffffff');
 		setShowModal(false);
 	};
 	useEffect(() => {
@@ -182,6 +201,7 @@ function ToDoList() {
 	}, [category]);
 
 	const toDos = useRecoilValue(toDoSelector);
+	console.log(toDos);
 
 	return (
 		<Container>
@@ -229,7 +249,8 @@ function ToDoList() {
 						</button>
 						<form onSubmit={handleSubmit(onValid)}>
 							<input type='text' {...register('cateName', { required: true })} placeholder='write the category name' />
-							<input type='color' {...register('cateColor')} placeholder='select color' />
+							{/* <input type='color' {...register('cateColor')} placeholder='select color' /> */}
+							<HexColorPicker color={color} onChange={setColor} />
 							<input type='submit' value='add category' />
 						</form>
 					</div>
