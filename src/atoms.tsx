@@ -64,3 +64,13 @@ export const toDoSelector = selector({
 		// ];
 	},
 });
+
+interface IModalState {
+	status: boolean;
+	type: string;
+}
+
+export const modalState = atom<IModalState>({
+	key: 'cateModal',
+	default: { status: false, type: '' },
+});

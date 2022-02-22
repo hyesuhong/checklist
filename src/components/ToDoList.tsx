@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import styled from 'styled-components';
-import { categoryState, toDoSelector, viewState } from '../atoms';
+import { categoryState, toDoSelector, viewState, modalState } from '../atoms';
 import CreateToDo from './CreateToDo';
 import ToDo from './ToDo';
-import { useForm } from 'react-hook-form';
-import { HexColorPicker } from 'react-colorful';
+import CreateCategory from './CreateCategory';
 
 const Container = styled.div`
 	display: grid;
@@ -24,11 +23,15 @@ const Header = styled.header`
 	padding: 0 5%;
 	border-bottom: 1px solid #fff;
 
-	button.editBtn {
+	div.btn_area {
 		position: absolute;
 		top: 50%;
 		right: 5%;
 		transform: translateY(-50%);
+		display: flex;
+	}
+
+	div.btn_area > button {
 		width: 40px;
 		height: 26px;
 		background: transparent;
@@ -37,9 +40,13 @@ const Header = styled.header`
 		outline: none;
 		color: ${(props) => props.theme.textColor};
 		padding: 0;
+		margin-left: 10px;
 		transition: all 0.3s;
 	}
-	button.editBtn:hover {
+	div.btn_area > button:first-child {
+		margin-left: 0;
+	}
+	div.btn_area > button:hover {
 		background: ${(props) => props.theme.textColor};
 		color: ${(props) => props.theme.bgColor};
 	}
@@ -102,56 +109,6 @@ const CategoryItem = styled.li<{ bdColor?: string }>`
 	}
 `;
 
-const SettingCategory = styled.div`
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	& > div {
-		width: 300px;
-		padding: 10px;
-		border-radius: 10px;
-		background: ${(props) => props.theme.bgColor};
-		border: 1px solid #fff;
-		text-align: right;
-	}
-	div.react-colorful {
-		width: 100%;
-		margin: 5px auto;
-	}
-	div.react-colorful__saturation {
-		border-radius: 0;
-	}
-	div.react-colorful__last-control {
-		border-radius: 0;
-	}
-	button {
-		width: 30px;
-		height: 30px;
-		font-size: 20px;
-		background: transparent;
-		border: none;
-		outline: none;
-		color: #fff;
-	}
-	form {
-		margin-top: 10px;
-		text-align: left;
-		input {
-			width: 100%;
-			height: 30px;
-			background: transparent;
-			border: 1px solid #fff;
-			outline: none;
-			color: #fff;
-		}
-	}
-`;
-
 const ToDoContent = styled.ul`
 	flex: 1;
 	overflow-x: hidden;
@@ -159,16 +116,11 @@ const ToDoContent = styled.ul`
 	padding: 5px;
 `;
 
-interface IForm {
-	cateName: string;
-}
-
 function ToDoList() {
-	const [showModal, setShowModal] = useState(false);
 	const [editMode, setEditMode] = useState(false);
-	const [category, setCategory] = useRecoilState(categoryState);
+	const category = useRecoilValue(categoryState);
+	const [modal, setModalState] = useRecoilState(modalState);
 	const [view, setView] = useRecoilState(viewState);
-	const [color, setColor] = useState('#000000');
 
 	const clickCategory = (event: React.MouseEvent<HTMLLIElement>) => {
 		const classList = event.currentTarget.classList;
@@ -189,32 +141,34 @@ function ToDoList() {
 		}
 	};
 
-	const { register, handleSubmit, setValue } = useForm<IForm>();
-	const onValid = ({ cateName }: IForm) => {
-		setCategory((prev) => [...prev, { id: Date.now(), name: cateName, color: color }]);
-		setValue('cateName', '');
-		setColor('#ffffff');
-		setShowModal(false);
-	};
 	useEffect(() => {
 		localStorage.setItem('category', JSON.stringify(category));
 	}, [category]);
 
 	const toDos = useRecoilValue(toDoSelector);
-	console.log(toDos);
 
 	return (
 		<Container>
 			<Header>
 				<Title>CheckCheck</Title>
-				<button
-					className='editBtn'
-					onClick={() => {
-						setEditMode((cur) => !cur);
-					}}
-				>
-					{editMode ? 'Done' : 'Edit'}
-				</button>
+				<div className='btn_area'>
+					<button
+						className='add_btn'
+						onClick={() => {
+							setModalState({ status: true, type: 'todo' });
+						}}
+					>
+						Add
+					</button>
+					<button
+						className='editBtn'
+						onClick={() => {
+							setEditMode((cur) => !cur);
+						}}
+					>
+						{editMode ? 'Done' : 'Edit'}
+					</button>
+				</div>
 			</Header>
 
 			<CategoryList>
@@ -228,34 +182,15 @@ function ToDoList() {
 				))}
 				<button
 					onClick={() => {
-						setShowModal(true);
+						setModalState({ status: true, type: 'category' });
 					}}
 				>
 					+
 				</button>
 			</CategoryList>
-			<CreateToDo />
 
-			{showModal ? (
-				<SettingCategory>
-					<div className='wrapper'>
-						<button
-							className='closeBtn'
-							onClick={() => {
-								setShowModal(false);
-							}}
-						>
-							✕
-						</button>
-						<form onSubmit={handleSubmit(onValid)}>
-							<input type='text' {...register('cateName', { required: true })} placeholder='write the category name' />
-							{/* <input type='color' {...register('cateColor')} placeholder='select color' /> */}
-							<HexColorPicker color={color} onChange={setColor} />
-							<input type='submit' value='add category' />
-						</form>
-					</div>
-				</SettingCategory>
-			) : null}
+			{modal.status && modal.type === 'todo' ? <CreateToDo /> : null}
+			{modal.status && modal.type === 'category' ? <CreateCategory /> : null}
 
 			<ToDoContent>
 				{toDos?.map((toDo) => (

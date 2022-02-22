@@ -1,38 +1,65 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import styled from 'styled-components';
-import { categoryState, Conditions, toDoState } from '../atoms';
+import { categoryState, Conditions, modalState, toDoState } from '../atoms';
 
-const AddToDoForm = styled.form`
-	position: absolute;
-	bottom: 0;
+const AddToDoModal = styled.div`
+	position: fixed;
+	top: 0;
 	left: 0;
 	width: 100%;
-	height: 40px;
+	height: 100%;
 	display: flex;
+	justify-content: center;
+	align-items: center;
+	& > div {
+		width: 300px;
+		padding: 10px;
+		border-radius: 10px;
+		background: ${(props) => props.theme.bgColor};
+		border: 1px solid ${(props) => props.theme.textColor};
+		text-align: right;
+	}
 
-	select {
-		flex: 0 0 100px;
-		height: 100%;
-		background: #000;
+	& > div > button {
+		width: 30px;
+		height: 30px;
+		font-size: 20px;
+		background: transparent;
 		border: none;
 		outline: none;
 		color: #fff;
 	}
-	input {
-		flex: 1;
-		height: 100%;
-		background: transparent;
+`;
+
+const AddToDoForm = styled.form`
+	display: flex;
+	flex-direction: column;
+
+	select {
+		flex: 0 0 40px;
+		background: ${(props) => props.theme.bgColor};
+		border: none;
 		outline: none;
-		color: #fff;
+		color: ${(props) => props.theme.textColor};
+	}
+	input {
+		width: 100%;
+		height: 30px;
+		background: transparent;
+		border: 1px solid ${(props) => props.theme.textColor};
+		padding: 0 5px;
+		outline: none;
+		color: ${(props) => props.theme.textColor};
+		margin: 5px auto;
 	}
 	button {
 		flex: 0 0 40px;
 		height: 100%;
 		font-size: 30px;
 		padding: 0;
-		color: #fff;
+		color: ${(props) => props.theme.textColor};
 		background: transparent;
 		border: none;
 		outline: none;
@@ -49,6 +76,7 @@ function CreateToDo() {
 	/* useState와 비슷한 형태로 사용할 수 있음 */
 	const [toDos, setToDos] = useRecoilState(toDoState);
 	const category = useRecoilValue(categoryState);
+	const setModalState = useSetRecoilState(modalState);
 	/*
   - register을 사용하면 기존에 useState, onChange 등을 사용해서 관리하던 것들을 해결해줌
   - ...register('toDo') : es6. register함수가 리턴하는 객체를 인풋에 props로 전달
@@ -61,6 +89,7 @@ function CreateToDo() {
 	const onValid = async ({ toDo, categoryId }: IForm) => {
 		await setToDos((prev) => [{ text: toDo, id: Date.now(), category: categoryId, condition: Conditions.YET }, ...prev]);
 		setValue('toDo', '');
+		setModalState({ status: false, type: '' });
 	};
 
 	useEffect(() => {
@@ -68,17 +97,29 @@ function CreateToDo() {
 	}, [toDos]);
 
 	return (
-		<AddToDoForm onSubmit={handleSubmit(onValid)}>
-			<select {...register('categoryId')}>
-				{Object.values(category).map((item) => (
-					<option value={item.id} key={item.id}>
-						{item.name}
-					</option>
-				))}
-			</select>
-			<input {...register('toDo', { required: true })} placeholder='Write a to do' />
-			<button>+</button>
-		</AddToDoForm>
+		<AddToDoModal>
+			<div>
+				<button
+					className='closeBtn'
+					onClick={() => {
+						setModalState({ status: false, type: '' });
+					}}
+				>
+					✕
+				</button>
+				<AddToDoForm onSubmit={handleSubmit(onValid)}>
+					<select {...register('categoryId')}>
+						{Object.values(category).map((item) => (
+							<option value={item.id} key={item.id}>
+								{item.name}
+							</option>
+						))}
+					</select>
+					<input {...register('toDo', { required: true })} placeholder='Write a to do' />
+					<input type='submit' value='add to do' />
+				</AddToDoForm>
+			</div>
+		</AddToDoModal>
 	);
 }
 export default CreateToDo;
