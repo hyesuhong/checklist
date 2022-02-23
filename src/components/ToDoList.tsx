@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import styled from 'styled-components';
-import { categoryState, toDoSelector, viewState, modalState } from '../atoms';
+import { categoryState, toDoSelector, viewState, modalState, Conditions } from '../atoms';
 import CreateToDo from './CreateToDo';
 import ToDo from './ToDo';
 import CreateCategory from './CreateCategory';
@@ -36,7 +36,6 @@ const Header = styled.header`
 		height: 26px;
 		background: transparent;
 		border: 1px solid ${(props) => props.theme.textColor};
-		border-radius: 5px;
 		outline: none;
 		color: ${(props) => props.theme.textColor};
 		padding: 0;
@@ -70,11 +69,15 @@ const CategoryList = styled.ul`
 	button {
 		width: 100%;
 		height: 60px;
-		border-radius: 100%;
-		background: #fdfdfd;
-		border: none;
+		background: transparent;
+		border: 1px solid ${(props) => props.theme.textColor};
+		color: ${(props) => props.theme.textColor};
 		outline: none;
 		font-size: 1.4rem;
+	}
+	button:hover {
+		background: ${(props) => props.theme.textColor};
+		color: ${(props) => props.theme.bgColor};
 	}
 `;
 
@@ -85,9 +88,8 @@ const CategoryItem = styled.li<{ bdColor?: string }>`
 	align-items: center;
 	width: 100%;
 	height: 60px;
-	background: #fdfdfd;
-	color: #000;
-	border-radius: 100%;
+	background: ${(props) => props.bdColor || props.theme.textColor};
+	color: ${(props) => props.theme.bgColor};
 	margin-bottom: 10px;
 	font-size: 14px;
 	opacity: 0.5;
@@ -96,25 +98,41 @@ const CategoryItem = styled.li<{ bdColor?: string }>`
 	&.active {
 		opacity: 1;
 	}
+`;
 
-	::before {
-		content: '';
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		border-radius: 100%;
-		border-left: 4px solid ${(props) => props.bdColor || '#fdfdfd'};
-		border-bottom: 4px solid ${(props) => props.bdColor || '#fdfdfd'};
-		box-sizing: border-box;
+const ToDoContainer = styled.div`
+	flex: 1;
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	grid-column-gap: 40px;
+	padding: 40px;
+`;
+
+const ToDoContent = styled.dl`
+	display: grid;
+	grid-template-rows: minmax(0, 1fr) 40px;
+	border: 1px solid ${(props) => props.theme.textColor};
+
+	dt {
+		text-align: center;
+		font-size: 1.6rem;
+		font-weight: 500;
+		line-height: 40px;
+		border-top: 1px solid ${(props) => props.theme.textColor};
+		order: 1;
+	}
+
+	dd {
+		padding: 10px;
 	}
 `;
 
-const ToDoContent = styled.ul`
-	flex: 1;
-	overflow-x: hidden;
-	overflow-y: auto;
-	padding: 5px;
-`;
+// const ToDoContent = styled.ul`
+// 	flex: 1;
+// 	overflow-x: hidden;
+// 	overflow-y: auto;
+// 	padding: 5px;
+// `;
 
 function ToDoList() {
 	const [editMode, setEditMode] = useState(false);
@@ -188,15 +206,35 @@ function ToDoList() {
 					+
 				</button>
 			</CategoryList>
+			<ToDoContainer>
+				<ToDoContent>
+					<dt>Doing</dt>
+					<dd>
+						<ul>
+							{toDos?.map((toDo) => {
+								if (toDo.condition === Conditions.YET) {
+									return <ToDo key={toDo.id} {...toDo} mode={editMode ? 'Edit' : ''} />;
+								}
+							})}
+						</ul>
+					</dd>
+				</ToDoContent>
+				<ToDoContent>
+					<dt>Done</dt>
+					<dd>
+						<ul>
+							{toDos?.map((toDo) => {
+								if (toDo.condition === Conditions.DONE) {
+									return <ToDo key={toDo.id} {...toDo} mode={editMode ? 'Edit' : ''} />;
+								}
+							})}
+						</ul>
+					</dd>
+				</ToDoContent>
+			</ToDoContainer>
 
 			{modal.status && modal.type === 'todo' ? <CreateToDo /> : null}
 			{modal.status && modal.type === 'category' ? <CreateCategory /> : null}
-
-			<ToDoContent>
-				{toDos?.map((toDo) => (
-					<ToDo key={toDo.id} {...toDo} mode={editMode ? 'Edit' : ''} />
-				))}
-			</ToDoContent>
 		</Container>
 	);
 }
