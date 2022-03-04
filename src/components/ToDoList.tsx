@@ -127,13 +127,6 @@ const ToDoContent = styled.dl`
 	}
 `;
 
-// const ToDoContent = styled.ul`
-// 	flex: 1;
-// 	overflow-x: hidden;
-// 	overflow-y: auto;
-// 	padding: 5px;
-// `;
-
 function ToDoList() {
 	const [editMode, setEditMode] = useState(false);
 	const category = useRecoilValue(categoryState);

@@ -3,6 +3,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import styled from 'styled-components';
 import { categoryState, Conditions, IToDos, toDoState } from '../atoms';
 import { IconRemove } from '../assets/image/icon';
+import CheckBox from './CheckBox';
 
 const ToDoItem = styled.li<{ bdColor?: string }>`
 	position: relative;
@@ -53,6 +54,7 @@ function ToDo({ text, category, id, condition, mode }: IToDoItem) {
 
 	return (
 		<ToDoItem bdColor={categorySet.find((cate) => cate.id === Number(category))?.color}>
+			{/* <CheckBox id={id.toString()} text={text} category={category} checked={condition === Conditions.YET ? false : true} disabled={mode === 'Edit' ? true : false} /> */}
 			<input type='checkbox' id={`CHK_${id}`} value={id} onChange={onChange} checked={condition === Conditions.YET ? false : true} disabled={mode === 'Edit' ? true : false} />
 			<label htmlFor={`CHK_${id}`}></label>
 			<span>{text}</span>
