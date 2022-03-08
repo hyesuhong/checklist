@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import styled from 'styled-components';
-import { categoryState, toDoSelector, viewState, modalState, Conditions } from '../atoms';
+import { categoryState, toDoSelector, viewState, modalState, Conditions, toDoState } from '../atoms';
 import CreateToDo from './CreateToDo';
 import ToDo from './ToDo';
 import CreateCategory from './CreateCategory';
@@ -48,6 +48,12 @@ const Header = styled.header`
 	div.btn_area > button:hover {
 		background: ${(props) => props.theme.textColor};
 		color: ${(props) => props.theme.bgColor};
+	}
+	div.btn_area > button:disabled {
+		opacity: 0.5;
+		background: transparent;
+		color: ${(props) => props.theme.textColor};
+		cursor: not-allowed;
 	}
 `;
 
@@ -114,10 +120,11 @@ const ToDoContent = styled.dl`
 	border: 1px solid ${(props) => props.theme.textColor};
 
 	dt {
-		text-align: center;
-		font-size: 1.6rem;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-size: 1.4rem;
 		font-weight: 500;
-		line-height: 40px;
 		border-top: 1px solid ${(props) => props.theme.textColor};
 		order: 1;
 	}
@@ -130,6 +137,8 @@ const ToDoContent = styled.dl`
 function ToDoList() {
 	const [editMode, setEditMode] = useState(false);
 	const category = useRecoilValue(categoryState);
+	const toDoList = useRecoilValue(toDoState);
+	const toDos = useRecoilValue(toDoSelector);
 	const [modal, setModalState] = useRecoilState(modalState);
 	const [view, setView] = useRecoilState(viewState);
 
@@ -156,7 +165,9 @@ function ToDoList() {
 		localStorage.setItem('category', JSON.stringify(category));
 	}, [category]);
 
-	const toDos = useRecoilValue(toDoSelector);
+	useEffect(() => {
+		localStorage.setItem('toDo', JSON.stringify(toDoList));
+	}, [toDoList]);
 
 	return (
 		<Container>
@@ -168,6 +179,7 @@ function ToDoList() {
 						onClick={() => {
 							setModalState({ status: true, type: 'todo' });
 						}}
+						disabled={editMode ? true : false}
 					>
 						Add
 					</button>
@@ -226,7 +238,7 @@ function ToDoList() {
 				</ToDoContent>
 			</ToDoContainer>
 
-			{modal.status && modal.type === 'todo' ? <CreateToDo /> : null}
+			{modal.status && modal.type === 'todo' ? <CreateToDo selectedCategory={view} /> : null}
 			{modal.status && modal.type === 'category' ? <CreateCategory /> : null}
 		</Container>
 	);

@@ -1,6 +1,5 @@
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import styled from 'styled-components';
 import { categoryState, Conditions, modalState, toDoState } from '../atoms';
 
@@ -15,14 +14,14 @@ const AddToDoModal = styled.div`
 	align-items: center;
 	& > div {
 		width: 300px;
-		padding: 10px;
+		padding: 5px 10px 10px;
 		border-radius: 10px;
 		background: ${(props) => props.theme.bgColor};
 		border: 1px solid ${(props) => props.theme.textColor};
 		text-align: right;
 	}
 
-	& > div > button {
+	& > div > button.closeBtn {
 		width: 30px;
 		height: 30px;
 		font-size: 20px;
@@ -30,6 +29,7 @@ const AddToDoModal = styled.div`
 		border: none;
 		outline: none;
 		color: #fff;
+		margin-bottom: 5px;
 	}
 `;
 
@@ -37,13 +37,6 @@ const AddToDoForm = styled.form`
 	display: flex;
 	flex-direction: column;
 
-	select {
-		flex: 0 0 40px;
-		background: ${(props) => props.theme.bgColor};
-		border: none;
-		outline: none;
-		color: ${(props) => props.theme.textColor};
-	}
 	input {
 		width: 100%;
 		height: 30px;
@@ -54,17 +47,42 @@ const AddToDoForm = styled.form`
 		color: ${(props) => props.theme.textColor};
 		margin: 5px auto;
 	}
-	button {
-		flex: 0 0 40px;
+`;
+
+const SelectBox = styled.div`
+	position: relative;
+	flex: 0 0 30px;
+
+	select {
+		appearance: none;
+		-webkit-appearance: none;
+		width: 100%;
 		height: 100%;
-		font-size: 30px;
-		padding: 0;
-		color: ${(props) => props.theme.textColor};
 		background: transparent;
-		border: none;
+		border: 1px solid ${(props) => props.theme.textColor};
 		outline: none;
+		color: ${(props) => props.theme.textColor};
+		padding: 0 5px;
+		border-radius: 0;
+		box-sizing: border-box;
+	}
+
+	&::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		right: 8px;
+		transform: translateY(-50%) rotateZ(-45deg);
+		width: 6px;
+		height: 6px;
+		border-bottom: 1px solid ${(props) => props.theme.textColor};
+		border-left: 1px solid ${(props) => props.theme.textColor};
 	}
 `;
+
+interface ICreateToDoProps {
+	selectedCategory: number;
+}
 
 /* react hook form -> 여러 인풋을 사용할 때 좋은 라이브러리. validation을 하기 편함 */
 interface IForm {
@@ -72,9 +90,9 @@ interface IForm {
 	categoryId: number;
 }
 
-function CreateToDo() {
+function CreateToDo({ selectedCategory }: ICreateToDoProps) {
 	/* useState와 비슷한 형태로 사용할 수 있음 */
-	const [toDos, setToDos] = useRecoilState(toDoState);
+	const setToDos = useSetRecoilState(toDoState);
 	const category = useRecoilValue(categoryState);
 	const setModalState = useSetRecoilState(modalState);
 	/*
@@ -92,10 +110,6 @@ function CreateToDo() {
 		setModalState({ status: false, type: '' });
 	};
 
-	useEffect(() => {
-		localStorage.setItem('toDo', JSON.stringify(toDos));
-	}, [toDos]);
-
 	return (
 		<AddToDoModal>
 			<div>
@@ -108,13 +122,15 @@ function CreateToDo() {
 					✕
 				</button>
 				<AddToDoForm onSubmit={handleSubmit(onValid)}>
-					<select {...register('categoryId')}>
-						{Object.values(category).map((item) => (
-							<option value={item.id} key={item.id}>
-								{item.name}
-							</option>
-						))}
-					</select>
+					<SelectBox>
+						<select {...register('categoryId')} value={selectedCategory === 0 ? 1 : selectedCategory}>
+							{Object.values(category).map((item) => (
+								<option value={item.id} key={item.id}>
+									{item.name}
+								</option>
+							))}
+						</select>
+					</SelectBox>
 					<input {...register('toDo', { required: true })} placeholder='Write a to do' />
 					<input type='submit' value='add to do' />
 				</AddToDoForm>

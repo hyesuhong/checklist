@@ -1,9 +1,8 @@
 import React from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import styled from 'styled-components';
 import { categoryState, Conditions, IToDos, toDoState } from '../atoms';
 import { IconRemove } from '../assets/image/icon';
-import CheckBox from './CheckBox';
 
 const ToDoItem = styled.li<{ bdColor?: string }>`
 	position: relative;
@@ -11,6 +10,47 @@ const ToDoItem = styled.li<{ bdColor?: string }>`
 	border-radius: 5px;
 	border-left: 3px solid ${(props) => props.bdColor};
 	margin-bottom: 10px;
+
+	input[type='checkbox'] {
+		display: none;
+	}
+
+	input[type='checkbox'] + label {
+		position: relative;
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
+	}
+	input[type='checkbox'] + label::before {
+		content: '';
+		width: 16px;
+		height: 16px;
+		border: 1px solid ${(props) => props.theme.textColor};
+		box-sizing: border-box;
+		margin-right: 4px;
+	}
+	input[type='checkbox'] + label::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 8px;
+		transform: translate(-50%, -70%) rotateZ(-45deg);
+		width: 8px;
+		height: 4px;
+		border-bottom: 2px solid ${(props) => props.theme.bgColor};
+		border-left: 2px solid ${(props) => props.theme.bgColor};
+		opacity: 0;
+	}
+	input[type='checkbox']:checked + label::before {
+		background: ${(props) => props.theme.textColor};
+	}
+	input[type='checkbox']:checked + label::after {
+		opacity: 1;
+	}
+	input[type='checkbox']:disabled + label {
+		opacity: 0.4;
+	}
+
 	button.removeBtn {
 		position: absolute;
 		top: 50%;
@@ -31,7 +71,7 @@ interface IToDoItem extends IToDos {
 
 function ToDo({ text, category, id, condition, mode }: IToDoItem) {
 	const categorySet = useRecoilValue(categoryState);
-	const [toDos, setToDos] = useRecoilState(toDoState);
+	const setToDos = useSetRecoilState(toDoState);
 	const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const {
 			currentTarget: { value, checked },
@@ -49,15 +89,12 @@ function ToDo({ text, category, id, condition, mode }: IToDoItem) {
 			const targetIndex = prev.findIndex((todo) => todo.id === id);
 			return [...prev.slice(0, targetIndex), ...prev.slice(targetIndex + 1)];
 		});
-		localStorage.setItem('toDo', JSON.stringify(toDos));
 	};
 
 	return (
 		<ToDoItem bdColor={categorySet.find((cate) => cate.id === Number(category))?.color}>
-			{/* <CheckBox id={id.toString()} text={text} category={category} checked={condition === Conditions.YET ? false : true} disabled={mode === 'Edit' ? true : false} /> */}
 			<input type='checkbox' id={`CHK_${id}`} value={id} onChange={onChange} checked={condition === Conditions.YET ? false : true} disabled={mode === 'Edit' ? true : false} />
-			<label htmlFor={`CHK_${id}`}></label>
-			<span>{text}</span>
+			<label htmlFor={`CHK_${id}`}>{text}</label>
 			{mode === 'Edit' ? (
 				<button className='removeBtn' onClick={removeItem}>
 					<IconRemove fill='#fff' />

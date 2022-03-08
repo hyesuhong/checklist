@@ -3,8 +3,6 @@ import ToDoList from './components/ToDoList';
 
 // createGlobalStyle : 전역으로 부를 수 있는 스타일 컴포넌트를 생성
 const GlobalStyle = createGlobalStyle`
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500&family=Raleway:ital,wght@1,700&display=swap');
-
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
